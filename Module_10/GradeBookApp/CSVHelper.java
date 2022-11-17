@@ -45,12 +45,12 @@ public class CSVHelper {
 		
 	}
 	
-	public static ObservableList<Student> readData() throws FileNotFoundException{
+	public static ObservableList<String> readData() throws FileNotFoundException{
 		
 		csvReader = new CSVReader(new FileReader("grades.csv"));
-		ArrayList<Student> students = new ArrayList();
+		ArrayList<String> students = new ArrayList();
 		
-		csvReader.forEach(value -> students.add(new Student(value[0], value[1], value[2], value[3])));
+		csvReader.forEach(value -> students.add(new Student(value[0], value[1], value[2], value[3]).toString()));
 		
 		//Remove the header
 		
@@ -58,7 +58,14 @@ public class CSVHelper {
 			students.remove(0);
 		}
 		
-		 ObservableList<Student> data = FXCollections.observableArrayList(students);
+		 ObservableList<String> data = FXCollections.observableArrayList(students);
+		 
+		 try {
+			csvReader.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		 
 		 return data;
 	}

@@ -1,13 +1,12 @@
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import com.opencsv.CSVWriter;
+
 import com.opencsv.exceptions.CsvValidationException;
 
 import javafx.application.Application;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -18,13 +17,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 /*
     Srilakshmi, K. (2022). Intermediate Java Programming - KotaGradeBookApp class.
@@ -52,8 +50,6 @@ public class KotaGradeBookApp extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-
-		// Label lblFutureValueDate = new Label();
 
 		GridPane grid = new GridPane();
 		grid.setHgap(5.5);
@@ -86,10 +82,9 @@ public class KotaGradeBookApp extends Application {
 		stage.setScene(scene);
 		stage.setTitle("Kota Grade Book App");
 		stage.setWidth(500);
-		//stage.sizeToScene();
 		stage.show();
 		
-		viewBtn.setOnAction(e -> showTable());		
+		viewBtn.setOnAction(e -> viewData());		
 
 		clearBtn.setOnAction(e -> clearFormFields());
 		
@@ -107,9 +102,10 @@ public class KotaGradeBookApp extends Application {
 		lblAddStudent.setText("");
 	}
 
-	private void showTable()  {
+	@SuppressWarnings("unchecked")
+	private void viewData()  {
 
-		TableView<Student> table = new TableView<Student>();
+		TableView<String> table = new TableView<String>();
 		Stage stage = new Stage();
 
 		Scene scene = new Scene(new Group());
@@ -124,27 +120,56 @@ public class KotaGradeBookApp extends Application {
 		TableColumn courseCol = new TableColumn("Course");
 		TableColumn gradeCol = new TableColumn("Grade");
 		
-		 firstNameCol.setCellValueFactory(
-	                new PropertyValueFactory<Student, String>("firstName"));
-		 lastNameCol.setCellValueFactory(
-	                new PropertyValueFactory<Student, String>("lastName"));
-		 courseCol.setCellValueFactory(
-	                new PropertyValueFactory<Student, String>("course"));
-		 gradeCol.setCellValueFactory(
-	                new PropertyValueFactory<Student, String>("grade"));
-
+		
+		//Set the student firstname from CSV file to the table column
+		firstNameCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<String, String>, ObservableValue<String>>() {
+		    @Override
+		    public ObservableValue<String> call(TableColumn.CellDataFeatures<String, String> p) {
+		    	 return parseDataToColumn(p.getValue(), 0);
+		    }
+		});
+		
+		
+		//Set the student lastName from CSV file to the table column
+		lastNameCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<String, String>, ObservableValue<String>>() {
+		    @Override
+		    public ObservableValue<String> call(TableColumn.CellDataFeatures<String, String> p) {
+		        return parseDataToColumn(p.getValue(), 1);
+		    }
+		});
+		
+		//Set the student course from CSV file to the table column
+		courseCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<String, String>, ObservableValue<String>>() {
+			@Override
+		    public ObservableValue<String> call(TableColumn.CellDataFeatures<String, String> p) {
+		        return parseDataToColumn(p.getValue(), 2);
+		    }
+		});
+		
+		//Set the student grade from CSV file to the table column
+		gradeCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<String, String>, ObservableValue<String>>() {
+			@Override
+		    public ObservableValue<String> call(TableColumn.CellDataFeatures<String, String> p) {
+		        return parseDataToColumn(p.getValue(), 3);
+		    }
+		});
 		
 		 try {
-			table.setItems(CSVHelper.readData());
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		 table.getColumns().addAll(firstNameCol, lastNameCol, courseCol, gradeCol);
-
+				table.setItems(CSVHelper.readData());
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		  table.getColumns().addAll(firstNameCol, lastNameCol, courseCol, gradeCol);
+		
+				
+		
+		
 		final VBox vbox = new VBox();
 		vbox.setSpacing(4);
 		vbox.setPadding(new Insets(15, 0, 15, 30));
+		table.setMinWidth(400);
+		table.setMinHeight(400);
 		vbox.getChildren().addAll(label, table);
 
 		((Group) scene.getRoot()).getChildren().addAll(vbox);
@@ -181,6 +206,17 @@ public class KotaGradeBookApp extends Application {
 		gradesFld.setValue("");
 		
 
+	}
+	
+	//Split  the comma separated values to corresponding fields
+	private SimpleStringProperty parseDataToColumn(String studentData, int position) {
+		
+		String[] x = studentData.split(",");
+        if (x != null && x.length>position) {
+            return new SimpleStringProperty(x[position]);
+        } else {
+            return new SimpleStringProperty("");
+        }
 	}
 	
 	

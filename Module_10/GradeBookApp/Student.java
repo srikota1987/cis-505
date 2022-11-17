@@ -51,6 +51,13 @@ public class Student {
 		this.grade = grade;
 	}
 	
+	@Override
+	//Return the student details separated by comma
+	public String toString() {
+		  return  firstName + "," +  lastName + ","  + course + "," +  grade;
+		
+	}
+	
 
 	
 
